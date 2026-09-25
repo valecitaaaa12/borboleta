@@ -1,0 +1,475 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================
+// USUARIOS Y ROLES
+// =====================
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password_hash String?
+  rol           Rol       @default(CLIENTE)
+  activo        Boolean   @default(true)
+  telefono      String?
+  fechaNacimiento DateTime?
+  creado_en     DateTime  @default(now())
+  actualizado_en DateTime @updatedAt
+
+  // NextAuth
+  accounts      Account[]
+  sessions      Session[]
+
+  // Relaciones de negocio
+  eventos       Evento[]
+  cotizaciones  Cotizacion[]
+  referidos     Referido[]   @relation("ClienteReferidor")
+  referidoPor   Referido?    @relation("ClienteReferido")
+  playlists     PlaylistCliente[]
+  suscriptor    Suscriptor?
+
+  @@map("users")
+}
+
+enum Rol {
+  ADMIN
+  CLIENTE
+  COORDINADOR
+}
+
+// NextAuth models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// =====================
+// EVENTOS / RESERVAS
+// =====================
+model Evento {
+  id             String        @id @default(cuid())
+  cliente_id     String
+  tipo_evento    TipoEvento
+  fecha          DateTime
+  num_invitados  Int
+  estado         EstadoEvento  @default(PENDIENTE)
+  monto_total    Float
+  con_factura    Boolean       @default(false)
+  notas          String?       @db.Text
+  creado_en      DateTime      @default(now())
+  actualizado_en DateTime      @updatedAt
+
+  cliente        User          @relation(fields: [cliente_id], references: [id])
+  pagos          PagoProgreso[]
+  contrato       ContratoDigital?
+  playlist       PlaylistCliente?
+  inventario     EventoInventario[]
+
+  @@map("eventos")
+}
+
+enum TipoEvento {
+  BODA
+  QUINCEANERA
+  CORPORATIVO
+  INFANTIL
+  OTRO
+}
+
+enum EstadoEvento {
+  PENDIENTE
+  CONFIRMADO
+  CANCELADO
+  COMPLETADO
+}
+
+// =====================
+// COTIZACIONES
+// =====================
+model Cotizacion {
+  id                  String     @id @default(cuid())
+  cliente_id          String?
+  nombre_cliente      String
+  email_cliente       String
+  telefono_cliente    String?
+  tipo_evento         TipoEvento
+  num_invitados       Int
+  menu_id             String?
+  servicios_extra     String[]
+  montaje_tipo        String
+  presupuesto_estimado Float
+  con_factura         Boolean    @default(false)
+  paquete_id          String?
+  notas               String?    @db.Text
+  estado              String     @default("nueva")
+  fecha_evento        DateTime?
+  fecha_creacion      DateTime   @default(now())
+
+  cliente             User?      @relation(fields: [cliente_id], references: [id])
+  menu                Menu?      @relation(fields: [menu_id], references: [id])
+  paquete             PaqueteEvento? @relation(fields: [paquete_id], references: [id])
+
+  @@map("cotizaciones")
+}
+
+// =====================
+// DISPONIBILIDAD CALENDARIO
+// =====================
+model DisponibilidadCalendario {
+  id     String            @id @default(cuid())
+  fecha  DateTime          @unique
+  estado EstadoCalendario  @default(LIBRE)
+  nota   String?
+
+  @@map("disponibilidad_calendario")
+}
+
+enum EstadoCalendario {
+  LIBRE
+  OCUPADO
+  PROVISIONAL
+}
+
+// =====================
+// MENÚS Y PLATILLOS
+// =====================
+model Menu {
+  id               String   @id @default(cuid())
+  nombre           String
+  descripcion      String?  @db.Text
+  foto_url         String?
+  precio_por_persona Float
+  categoria        String
+  activo           Boolean  @default(true)
+  platillos        Platillo[]
+  cotizaciones     Cotizacion[]
+
+  @@map("menus")
+}
+
+model Platillo {
+  id           String   @id @default(cuid())
+  menu_id      String
+  nombre       String
+  descripcion  String?  @db.Text
+  foto_url     String?
+  ingredientes String[]
+  alergenos    String[]
+  tipo         String   // entrada, principal, postre, bebida
+
+  menu         Menu     @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+
+  @@map("platillos")
+}
+
+// =====================
+// SERVICIOS EXTRA
+// =====================
+model ServicioExtra {
+  id          String  @id @default(cuid())
+  nombre      String
+  descripcion String? @db.Text
+  precio      Float
+  categoria   String  // DJ, decoracion, fotografia, etc.
+  foto_url    String?
+  activo      Boolean @default(true)
+
+  @@map("servicios_extra")
+}
+
+// =====================
+// PAQUETES DE EVENTOS
+// =====================
+model PaqueteEvento {
+  id          String   @id @default(cuid())
+  nombre      String   // Economico, Estandar, Premium
+  descripcion String?  @db.Text
+  precio_base Float
+  max_invitados Int
+  incluye     String[] // lista de características
+  foto_url    String?
+  activo      Boolean  @default(true)
+  destacado   Boolean  @default(false)
+  cotizaciones Cotizacion[]
+
+  @@map("paquetes_eventos")
+}
+
+// =====================
+// TESTIMONIOS
+// =====================
+model Testimonio {
+  id            String     @id @default(cuid())
+  nombre_cliente String
+  texto         String     @db.Text
+  video_url     String?
+  tipo_evento   TipoEvento
+  foto_url      String?
+  calificacion  Int        @default(5)
+  activo        Boolean    @default(true)
+  creado_en     DateTime   @default(now())
+
+  @@map("testimonios")
+}
+
+// =====================
+// GALERÍA
+// =====================
+model GaleriaItem {
+  id          String     @id @default(cuid())
+  url         String
+  tipo_evento TipoEvento
+  descripcion String?
+  alt         String?
+  activo      Boolean    @default(true)
+  orden       Int        @default(0)
+  creado_en   DateTime   @default(now())
+
+  @@map("galeria")
+}
+
+// =====================
+// PAGOS Y PROGRESOS
+// =====================
+model PagoProgreso {
+  id               String   @id @default(cuid())
+  evento_id        String
+  monto_pagado     Float
+  monto_total      Float
+  fecha_pago       DateTime @default(now())
+  comprobante_url  String?
+  metodo_pago      String?  // efectivo, QR, transferencia, stripe
+  notas            String?
+
+  evento           Evento   @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+
+  @@map("pagos_progreso")
+}
+
+// =====================
+// CONTRATOS DIGITALES
+// =====================
+model ContratoDigital {
+  id            String    @id @default(cuid())
+  evento_id     String    @unique
+  url_documento String?
+  firmado       Boolean   @default(false)
+  fecha_firma   DateTime?
+  nombre_firmante String?
+  ip_firmante   String?
+
+  evento        Evento    @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+
+  @@map("contratos_digitales")
+}
+
+// =====================
+// PLAYLIST DEL CLIENTE
+// =====================
+model PlaylistCliente {
+  id        String   @id @default(cuid())
+  evento_id String   @unique
+  user_id   String
+  canciones Json     @default("[]")
+  notas     String?
+
+  evento    Evento   @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [user_id], references: [id])
+
+  @@map("playlists_clientes")
+}
+
+// =====================
+// FAQ
+// =====================
+model FAQ {
+  id        String  @id @default(cuid())
+  pregunta  String
+  respuesta String  @db.Text
+  categoria String  @default("general")
+  orden     Int     @default(0)
+  activo    Boolean @default(true)
+
+  @@map("faqs")
+}
+
+// =====================
+// CONFIGURACIÓN DE PRECIOS POR TEMPORADA
+// =====================
+model ConfiguracionPrecios {
+  id           String   @id @default(cuid())
+  temporada    String   // alta, baja
+  fecha_inicio DateTime
+  fecha_fin    DateTime
+  factor_precio Float   @default(1.0)
+  descripcion  String?
+
+  @@map("configuracion_precios")
+}
+
+// =====================
+// BLOG
+// =====================
+model BlogPost {
+  id           String   @id @default(cuid())
+  titulo       String
+  slug         String   @unique
+  contenido    String   @db.Text
+  resumen      String?  @db.Text
+  foto_portada String?
+  autor        String
+  publicado    Boolean  @default(false)
+  fecha        DateTime @default(now())
+  etiquetas    String[]
+  creado_en    DateTime @default(now())
+  actualizado_en DateTime @updatedAt
+
+  @@map("blog_posts")
+}
+
+// =====================
+// SUSCRIPTORES NEWSLETTER
+// =====================
+model Suscriptor {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  user_id   String?  @unique
+  activo    Boolean  @default(true)
+  fecha     DateTime @default(now())
+
+  user      User?    @relation(fields: [user_id], references: [id])
+
+  @@map("suscriptores")
+}
+
+// =====================
+// REFERIDOS
+// =====================
+model Referido {
+  id             String   @id @default(cuid())
+  codigo         String   @unique
+  cliente_id     String
+  referido_email String
+  referido_id    String?  @unique
+  estado         String   @default("pendiente") // pendiente, completado
+  recompensa     Float    @default(0)
+  creado_en      DateTime @default(now())
+
+  cliente        User     @relation("ClienteReferidor", fields: [cliente_id], references: [id])
+  referido        User?   @relation("ClienteReferido", fields: [referido_id], references: [id])
+
+  @@map("referidos")
+}
+
+// =====================
+// PROVEEDORES ALIADOS
+// =====================
+model ProveedorAliado {
+  id        String  @id @default(cuid())
+  nombre    String
+  categoria String  // fotografia, pasteleria, floreria, etc.
+  contacto  String?
+  logo      String?
+  enlace    String?
+  activo    Boolean @default(true)
+
+  @@map("proveedores_aliados")
+}
+
+// =====================
+// INVENTARIO
+// =====================
+model Inventario {
+  id                  String             @id @default(cuid())
+  item                String
+  descripcion         String?
+  cantidad_total      Int
+  cantidad_disponible Int
+  categoria           String?
+  eventos             EventoInventario[]
+
+  @@map("inventario")
+}
+
+model EventoInventario {
+  id            String    @id @default(cuid())
+  evento_id     String
+  inventario_id String
+  cantidad      Int
+  
+  evento        Evento    @relation(fields: [evento_id], references: [id])
+  inventario    Inventario @relation(fields: [inventario_id], references: [id])
+
+  @@map("evento_inventario")
+}
+
+// =====================
+// CONFIGURACIÓN GENERAL (pop-ups, descuentos, etc.)
+// =====================
+model ConfiguracionGeneral {
+  id              String  @id @default(cuid())
+  clave           String  @unique
+  valor           String  @db.Text
+  descripcion     String?
+  tipo            String  @default("string") // string, number, boolean, json
+
+  @@map("configuracion_general")
+}
+
+// =====================
+// PREGUNTAS PÚBLICAS (FORO)
+// =====================
+model PreguntaPublica {
+  id          String    @id @default(cuid())
+  nombre      String
+  email       String
+  pregunta    String    @db.Text
+  respuesta   String?   @db.Text
+  aprobada    Boolean   @default(false)
+  respondida  Boolean   @default(false)
+  creado_en   DateTime  @default(now())
+
+  @@map("preguntas_publicas")
+}
