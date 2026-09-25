@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Requerido para Docker multi-etapa (standalone output)
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

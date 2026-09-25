@@ -1,0 +1,94 @@
+# =====================================================
+# Borboleta – Salón de Eventos | docker-compose.yml
+# Servicios: web (Next.js) + postgres + redis
+# Autor: Natalia Valentina Valda Ibáñez
+# =====================================================
+
+services:
+
+  # ── 1. Aplicación web Next.js ───────────────────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: borboleta-web:1.0
+    container_name: borboleta-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://borboleta_user:borboleta_pass@postgres:5432/borboleta_db
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: borboleta-secret-cambiar-en-produccion
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_WHATSAPP_NUMBER: "+59175791516"
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    volumes:
+      # Volumen para imágenes subidas por usuarios
+      - borboleta_uploads:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - borboleta-red
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── 2. Base de datos PostgreSQL ─────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: borboleta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: borboleta_user
+      POSTGRES_PASSWORD: borboleta_pass
+      POSTGRES_DB: borboleta_db
+    volumes:
+      # Volumen para persistir la base de datos
+      - borboleta_postgres_data:/var/lib/postgresql/data
+    networks:
+      - borboleta-red
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U borboleta_user -d borboleta_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── 3. Redis (caché y contador) ─────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: borboleta-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      # Volumen para persistir datos de Redis
+      - borboleta_redis_data:/data
+    networks:
+      - borboleta-red
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ── Volúmenes nombrados ───────────────────────────
+volumes:
+  borboleta_postgres_data:
+    driver: local
+  borboleta_redis_data:
+    driver: local
+  borboleta_uploads:
+    driver: local
+
+# ── Red personalizada bridge ──────────────────────
+networks:
+  borboleta-red:
+    driver: bridge

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { ButterflyLogo } from '@/components/butterfly-logo'
 import { Phone, MapPin, Mail, Instagram, Facebook, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,9 +37,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="relative h-10 w-10">
-                <Image src="/1.webp" alt="Borboleta Logo" fill className="object-contain" />
-              </div>
+              <ButterflyLogo size={40} color="#c59aff" />
               <span className="font-display text-2xl font-semibold">Borboleta</span>
             </Link>
             <p className="text-sm text-white/70 leading-relaxed">

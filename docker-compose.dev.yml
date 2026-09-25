@@ -1,0 +1,82 @@
+# =====================================================
+# Borboleta – docker-compose.dev.yml
+# Modo desarrollo con bind mounts (hot-reload)
+# Uso: docker compose -f docker-compose.dev.yml up
+# =====================================================
+
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: borboleta-dev:latest
+    container_name: borboleta-web-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://borboleta_user:borboleta_pass@postgres:5432/borboleta_db
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: borboleta-dev-secret
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_WHATSAPP_NUMBER: "+59175791516"
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    volumes:
+      # ── Bind mounts: código fuente en vivo ──────
+      - ./app:/app/app
+      - ./components:/app/components
+      - ./lib:/app/lib
+      - ./public:/app/public
+      - ./prisma:/app/prisma
+      - ./types:/app/types
+      # Mantener node_modules del contenedor
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - borboleta-red
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: borboleta-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: borboleta_user
+      POSTGRES_PASSWORD: borboleta_pass
+      POSTGRES_DB: borboleta_db
+    volumes:
+      - borboleta_postgres_dev:/var/lib/postgresql/data
+    networks:
+      - borboleta-red
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U borboleta_user -d borboleta_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: borboleta-redis-dev
+    restart: unless-stopped
+    networks:
+      - borboleta-red
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  borboleta_postgres_dev:
+    driver: local
+
+networks:
+  borboleta-red:
+    driver: bridge

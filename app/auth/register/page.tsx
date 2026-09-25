@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import { ButterflyLogo } from '@/components/butterfly-logo'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,7 +57,7 @@ export default function RegisterPage() {
         <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-2xl p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">
-              <Image src="/1.webp" alt="Borboleta Logo" width={60} height={60} className="object-contain" />
+              <ButterflyLogo size={60} color="#9333ea" />
             </div>
             <h1 className="font-serif text-2xl font-semibold">Crear Cuenta</h1>
             <p className="text-muted-foreground text-sm mt-1">Accede a tu portal de clientes</p>

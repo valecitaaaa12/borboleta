@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { ButterflyLogo } from '@/components/butterfly-logo'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSession, signOut } from 'next-auth/react'
 import { useTheme } from 'next-themes'
@@ -59,15 +59,10 @@ export function Navbar() {
       <nav className="container mx-auto flex h-16 items-center justify-between px-4" aria-label="Navegación principal">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary rounded-lg">
-          <div className="relative h-10 w-10">
-            <Image
-              src="/1.webp"
-              alt="Borboleta Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
+          <ButterflyLogo
+            size={38}
+            color={scrolled || pathname !== '/' ? '#9333ea' : '#ffffff'}
+          />
           <span className={cn(
             'font-display text-xl font-semibold transition-colors',
             scrolled || pathname !== '/' ? 'text-foreground' : 'text-white'

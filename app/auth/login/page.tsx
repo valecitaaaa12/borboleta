@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import { ButterflyLogo } from '@/components/butterfly-logo'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,7 +53,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">
-              <Image src="/1.webp" alt="Borboleta Logo" width={60} height={60} className="object-contain" />
+              <ButterflyLogo size={60} color="#9333ea" />
             </div>
             <h1 className="font-serif text-2xl font-semibold">Iniciar Sesión</h1>
             <p className="text-muted-foreground text-sm mt-1">Accede a tu portal de eventos</p>

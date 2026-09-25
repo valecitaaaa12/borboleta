@@ -1,0 +1,41 @@
+# Dependencias (se instalan dentro del build)
+node_modules
+npm-debug.log*
+
+# Build local de Next.js
+.next
+out
+dist
+build
+
+# Variables de entorno locales (nunca en imagen)
+.env
+.env.local
+.env.development
+.env.production
+
+# Base de datos local de Prisma
+prisma/dev.db
+prisma/dev.db-journal
+prisma/migrations/*/migration_lock.toml
+
+# Git
+.git
+.gitignore
+
+# Uploads del usuario (se montan como volumen)
+public/uploads/*
+
+# Archivos de desarrollo
+*.md
+docs/
+imagenes/
+.kiro/
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db

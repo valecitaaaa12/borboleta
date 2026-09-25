@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
+import { ButterflyLogo } from '@/components/butterfly-logo'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { Home, Calendar, Music, FileText, CreditCard, LogOut } from 'lucide-react'
