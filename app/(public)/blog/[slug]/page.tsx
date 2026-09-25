@@ -39,7 +39,7 @@ El salón determina la capacidad de invitados y marca el tono del evento. Visít
 ## Paso 5: Los detalles finales
 
 Confirma la lista de invitados, diseña las invitaciones, coordina el protocolo del día y crea una línea de tiempo detallada.`,
-    foto_portada: 'https://picsum.photos/seed/blog1/1200/600',
+    foto_portada: '/images/bodas/boda-1.jpg',
     autor: 'Equipo Borboleta',
     fecha: new Date('2026-01-15'),
     etiquetas: ['Bodas', 'Planificación', 'Sucre'],

@@ -187,21 +187,32 @@ async function main() {
   console.log('✅ Testimonios creados')
 
   // =====================
-  // GALERÍA (placeholder)
+  // GALERÍA con imágenes reales
   // =====================
-  const tiposEvento = ['BODA', 'QUINCEANERA', 'CORPORATIVO', 'INFANTIL'] as const
-  for (let i = 0; i < 12; i++) {
+  const galeriaItems = [
+    // BODAS
+    { id: 'gal-1', url: '/images/bodas/boda-1.jpg', tipo_evento: 'BODA' as const, descripcion: 'Boda elegante en Borboleta', alt: 'Boda en Borboleta Salón de Eventos Sucre', orden: 0 },
+    { id: 'gal-2', url: '/images/bodas/boda-2.jpg', tipo_evento: 'BODA' as const, descripcion: 'Ceremonia nupcial', alt: 'Ceremonia de boda en Borboleta Sucre', orden: 1 },
+    { id: 'gal-3', url: '/images/bodas/boda-3.jpg', tipo_evento: 'BODA' as const, descripcion: 'Recepción de boda', alt: 'Recepción de boda Borboleta', orden: 2 },
+    // QUINCEAÑERAS
+    { id: 'gal-4', url: '/images/quinceanos/quinceanera-1.jpg', tipo_evento: 'QUINCEANERA' as const, descripcion: 'Quinceañera mágica', alt: 'Quinceañera en Borboleta Salón Sucre', orden: 3 },
+    { id: 'gal-5', url: '/images/quinceanos/quinceanera-2.jpg', tipo_evento: 'QUINCEANERA' as const, descripcion: 'Celebración de 15 años', alt: 'Fiesta de 15 años en Borboleta', orden: 4 },
+    { id: 'gal-6', url: '/images/quinceanos/quinceanera-3.webp', tipo_evento: 'QUINCEANERA' as const, descripcion: 'Vals de quinceañera', alt: 'Vals quinceañera Borboleta', orden: 5 },
+    // CORPORATIVOS
+    { id: 'gal-7', url: '/images/corporativos/corporativo-1.jpg', tipo_evento: 'CORPORATIVO' as const, descripcion: 'Evento corporativo de alto nivel', alt: 'Evento corporativo Borboleta Sucre', orden: 6 },
+    { id: 'gal-8', url: '/images/corporativos/corporativo-2.jpg', tipo_evento: 'CORPORATIVO' as const, descripcion: 'Conferencia empresarial', alt: 'Conferencia corporativa en Borboleta', orden: 7 },
+    { id: 'gal-9', url: '/images/corporativos/corporativo-3.jpg', tipo_evento: 'CORPORATIVO' as const, descripcion: 'Gala corporativa', alt: 'Gala empresarial Borboleta', orden: 8 },
+    // INFANTILES
+    { id: 'gal-10', url: '/images/infantiles/infantil-1.jpg', tipo_evento: 'INFANTIL' as const, descripcion: 'Fiesta infantil mágica', alt: 'Fiesta infantil en Borboleta Sucre', orden: 9 },
+    { id: 'gal-11', url: '/images/infantiles/infantil-2.jpg', tipo_evento: 'INFANTIL' as const, descripcion: 'Cumpleaños para niños', alt: 'Cumpleaños infantil Borboleta', orden: 10 },
+    { id: 'gal-12', url: '/images/infantiles/infantil-3.jpg', tipo_evento: 'INFANTIL' as const, descripcion: 'Celebración infantil', alt: 'Fiesta de niños Borboleta Salón', orden: 11 },
+  ]
+
+  for (const item of galeriaItems) {
     await prisma.galeriaItem.upsert({
-      where: { id: `gal-${i + 1}` },
+      where: { id: item.id },
       update: {},
-      create: {
-        id: `gal-${i + 1}`,
-        url: `https://picsum.photos/seed/borboleta${i + 1}/800/600`,
-        tipo_evento: tiposEvento[i % 4],
-        descripcion: ['Boda elegante', 'Quinceañera mágica', 'Evento corporativo', 'Fiesta infantil'][i % 4],
-        alt: 'Evento en Borboleta Salón de Eventos',
-        orden: i,
-      },
+      create: item,
     })
   }
 

@@ -35,6 +35,7 @@ const FALLBACK_MENUS: Menu[] = [
     descripcion: 'Ideal para eventos corporativos. Equilibrio perfecto entre calidad y practicidad.',
     precio_por_persona: 85,
     categoria: 'Ejecutivo',
+    foto_url: '/images/corporativos/corporativo-1.jpg',
     platillos: [
       { id: 'p1', nombre: 'Ensalada César', tipo: 'entrada', ingredientes: ['Lechuga romana', 'Aderezo César', 'Crutones', 'Parmesano'], alergenos: ['Lácteos', 'Gluten'], descripcion: 'Clásica ensalada César con lechuga fresca y aderezo artesanal' },
       { id: 'p2', nombre: 'Pechuga a la plancha', tipo: 'principal', ingredientes: ['Pechuga de pollo', 'Hierbas finas', 'Limón', 'Aceite de oliva'], alergenos: [], descripcion: 'Pechuga jugosa marinada en hierbas frescas y limón' },
@@ -47,6 +48,7 @@ const FALLBACK_MENUS: Menu[] = [
     descripcion: 'El favorito de nuestros clientes. 4 tiempos que conquistan paladares.',
     precio_por_persona: 120,
     categoria: 'Clásico',
+    foto_url: '/images/bodas/boda-1.jpg',
     platillos: [
       { id: 'p4', nombre: 'Crema de zapallo', tipo: 'sopa', ingredientes: ['Zapallo', 'Crema de leche', 'Jengibre', 'Nuez moscada'], alergenos: ['Lácteos'], descripcion: 'Suave crema de zapallo con toque de jengibre' },
       { id: 'p5', nombre: 'Carpaccio de res', tipo: 'entrada', ingredientes: ['Lomo fino', 'Alcaparras', 'Rúcula', 'Parmesano'], alergenos: ['Lácteos'], descripcion: 'Finas láminas de lomo con aderezo de limón' },
@@ -66,6 +68,20 @@ const FALLBACK_MENUS: Menu[] = [
       { id: 'p10', nombre: 'Sorbete de limón', tipo: 'intermedio', ingredientes: ['Limón', 'Azúcar', 'Agua', 'Menta'], alergenos: [], descripcion: 'Refrescante sorbete para limpiar el paladar' },
       { id: 'p11', nombre: 'Filete de res a la borgoña', tipo: 'principal', ingredientes: ['Filete de res', 'Vino tinto', 'Champiñones', 'Cebollita perla'], alergenos: ['Alcohol'], descripcion: 'Tierno filete en salsa de vino tinto' },
       { id: 'p12', nombre: 'Tarta de frutos rojos', tipo: 'postre', ingredientes: ['Frutillas', 'Frambuesas', 'Arándanos', 'Crema pastelera', 'Masa sablé'], alergenos: ['Gluten', 'Lácteos', 'Huevo'], descripcion: 'Tarta elegante con frutas frescas de temporada' },
+    ],
+    foto_url: '/images/quinceanos/quinceanera-1.jpg',
+  },
+  {
+    id: '4',
+    nombre: 'Menú Infantil',
+    descripcion: 'Diseñado especialmente para los más pequeños.',
+    precio_por_persona: 65,
+    categoria: 'Infantil',
+    foto_url: '/images/infantiles/infantil-2.jpg',
+    platillos: [
+      { id: 'p13', nombre: 'Nuggets de pollo', tipo: 'principal', ingredientes: ['Pollo', 'Pan rallado'], alergenos: ['Gluten'], descripcion: 'Crujientes nuggets dorados' },
+      { id: 'p14', nombre: 'Papas fritas', tipo: 'acompañamiento', ingredientes: ['Papas', 'Sal'], alergenos: [], descripcion: 'Papas doradas y crujientes' },
+      { id: 'p15', nombre: 'Helado con toppings', tipo: 'postre', ingredientes: ['Helado', 'Chispas de chocolate'], alergenos: ['Lácteos'], descripcion: 'Helado con sorpresas para los niños' },
     ],
   },
 ]
@@ -100,18 +116,40 @@ export function MenusClient() {
             transition={{ delay: i * 0.1 }}
             className="rounded-3xl overflow-hidden border bg-card shadow-lg hover:shadow-xl transition-shadow"
           >
-            {/* Header */}
-            <div className="bg-gradient-to-br from-borboleta-purple-600 to-borboleta-purple-800 p-6 text-white">
-              <Badge className="bg-white/20 text-white border-white/30 mb-2">{menu.categoria}</Badge>
-              <h2 className="font-serif text-2xl font-semibold">{menu.nombre}</h2>
-              {menu.descripcion && (
-                <p className="text-white/80 text-sm mt-2 leading-relaxed">{menu.descripcion}</p>
+            {/* Imagen horizontal 16:9 con overlay de precio */}
+            <div className="relative w-full aspect-video overflow-hidden">
+              {menu.foto_url ? (
+                <Image
+                  src={menu.foto_url}
+                  alt={`${menu.nombre} en Borboleta`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-borboleta-purple-600 to-borboleta-purple-800" />
               )}
-              <div className="mt-4">
-                <p className="font-display text-3xl font-bold text-borboleta-gold-300">
-                  {formatCurrency(menu.precio_por_persona)}
-                </p>
-                <p className="text-white/60 text-xs">por persona</p>
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-borboleta-purple-900/90 via-borboleta-purple-900/40 to-transparent" />
+              {/* Badge + precio sobre la imagen */}
+              <div className="absolute top-3 left-3">
+                <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30">
+                  {menu.categoria}
+                </Badge>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <h2 className="font-serif text-2xl font-semibold leading-tight">{menu.nombre}</h2>
+                <div className="flex items-end justify-between mt-2">
+                  <p className="text-white/70 text-xs max-w-[65%] leading-relaxed line-clamp-2">
+                    {menu.descripcion}
+                  </p>
+                  <div className="text-right">
+                    <p className="font-display text-2xl font-bold text-borboleta-gold-300">
+                      {formatCurrency(menu.precio_por_persona)}
+                    </p>
+                    <p className="text-white/50 text-xs">por persona</p>
+                  </div>
+                </div>
               </div>
             </div>
 

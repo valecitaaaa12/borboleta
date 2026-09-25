@@ -15,7 +15,7 @@ const posts = [
     slug: 'como-planificar-boda-sucre',
     titulo: 'Cómo planificar tu boda en Sucre: guía completa 2026',
     resumen: 'Desde elegir la fecha hasta el último detalle de la decoración, te guiamos paso a paso en la planificación de tu boda perfecta en la ciudad blanca.',
-    foto_portada: 'https://picsum.photos/seed/blog1/800/400',
+    foto_portada: '/images/bodas/boda-3.jpg',
     autor: 'Equipo Borboleta',
     fecha: new Date('2026-01-15'),
     etiquetas: ['Bodas', 'Planificación', 'Sucre'],
@@ -24,7 +24,7 @@ const posts = [
     slug: 'tendencias-quinceaneras-2026',
     titulo: 'Tendencias en quinceañeras 2026: lo que está en boga',
     resumen: 'Descubre los colores, temas decorativos y experiencias que están marcando las quinceañeras más memorables de este año.',
-    foto_portada: 'https://picsum.photos/seed/blog2/800/400',
+    foto_portada: '/images/quinceanos/quinceanera-3.webp',
     autor: 'María González',
     fecha: new Date('2026-02-10'),
     etiquetas: ['Quinceañeras', 'Tendencias', 'Decoración'],
@@ -33,7 +33,7 @@ const posts = [
     slug: 'eventos-corporativos-exitosos',
     titulo: '5 claves para un evento corporativo exitoso',
     resumen: 'El éxito de un evento corporativo depende de muchos factores. Te compartimos los secretos que hemos aprendido en más de 10 años de experiencia.',
-    foto_portada: 'https://picsum.photos/seed/blog3/800/400',
+    foto_portada: '/images/corporativos/corporativo-3.jpg',
     autor: 'Carlos Rodríguez',
     fecha: new Date('2026-03-05'),
     etiquetas: ['Corporativo', 'Consejos', 'Networking'],
@@ -42,7 +42,7 @@ const posts = [
     slug: 'decoracion-fiestas-infantiles',
     titulo: 'Decoración mágica para fiestas infantiles: ideas creativas',
     resumen: 'Los pequeños merecen la mejor fiesta. Ideas originales y económicas para crear un ambiente de cuento en el salón.',
-    foto_portada: 'https://picsum.photos/seed/blog4/800/400',
+    foto_portada: '/images/infantiles/infantil-3.jpg',
     autor: 'Equipo Borboleta',
     fecha: new Date('2026-04-20'),
     etiquetas: ['Infantil', 'Decoración', 'DIY'],
@@ -66,11 +66,13 @@ export default function BlogPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {posts.map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group rounded-3xl overflow-hidden border bg-card shadow-md hover:shadow-xl transition-shadow">
-              <div className="relative h-52 overflow-hidden">
+              {/* Imagen horizontal 16:9 */}
+              <div className="relative w-full aspect-video overflow-hidden">
                 <Image
                   src={post.foto_portada}
                   alt={post.titulo}
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
